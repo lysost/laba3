@@ -1,0 +1,36 @@
+key_list = [1, 2, 3, 4, 5]
+alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzАБВГДЕЄЖЗИІЇКЛМНОПРСТУФХЦЧШЩЬЮЯАБВГДЕЄЖЗИІЇКЛМНОПРСТУФХЦЧШЩЬЮЯабвгдеєжзиіїклмнопрстухфцчшщьюяабвгдеєжзиіїклмнопрстухфцчшщьюя012345678901234567890"
+
+
+def get_key():
+    key = int(input("Choose your encryption keys(1-5): "))
+    if key in key_list:
+        print("Your messages now will be encrypted")
+        return key
+    else:
+        print("Wrong key")
+        return get_key()
+
+
+def encrypt_message(key, message):
+    encrypted_message = ""
+    for letter in message:
+        position = alphabet.find(letter)
+        new_position = position + key
+        if letter in alphabet:
+            encrypted_message = encrypted_message + alphabet[new_position]
+        else:
+            encrypted_message = encrypted_message + letter
+    return encrypted_message
+
+
+def decrypt_message(key, message):
+    encrypted_message = ""
+    for letter in message:
+        position = alphabet.find(letter)
+        new_position = position - key
+        if letter in alphabet:
+            encrypted_message = encrypted_message + alphabet[new_position]
+        else:
+            encrypted_message = encrypted_message + letter
+    return encrypted_message

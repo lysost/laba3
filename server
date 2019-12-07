@@ -1,0 +1,62 @@
+from socket import AF_INET, socket, SOCK_STREAM
+from threading import Thread
+
+ENCODING = "utf8"
+BUFSIZ = 1024
+
+
+def accept_incoming_connections():
+    """Sets up handling for incoming clientNames."""
+
+    while True:
+        client, client_address = SERVER.accept()
+        print("%s:%s has connected." % client_address)
+        client.send(bytes("Greetings from the cave! Now type your name and press enter!", "utf8"))
+        addresses[client] = client_address
+        client = Thread(target=handle_client, args=(client,)).start()
+
+
+def handle_client(client):
+    """Handles a single client connection."""
+
+    name = client.recv(BUFSIZ).decode("utf8")
+    client.send(bytes('Welcome %s! If you ever want to quit, type {quit} to exit.' % name,
+                      "utf8"))
+    broadcast(bytes("%s has joined the chat!" % name, "utf8"))
+
+    clientNames[client] = name
+
+    while True:
+        msg = client.recv(BUFSIZ)
+        if msg != bytes("{quit}", "utf8"):
+            broadcast(msg, name + ": ")
+            print("%s: %s" % (name, msg.decode(ENCODING)))
+        else:
+            client.send(bytes("{quit}", "utf8"))
+            client.close()
+            del clientNames[client]
+            broadcast(bytes("%s has left the chat." % name, "utf8"))
+            break
+
+
+def broadcast(msg, prefix=""):
+    """Broadcasts a message to all the clientNames."""
+
+    # key == client
+    for key in clientNames:
+        key.send(bytes(prefix, "utf8") + msg)
+
+
+clientNames = {}
+addresses = {}
+SERVER = socket(AF_INET, SOCK_STREAM)
+SERVER.bind(('', 33000))
+
+
+if __name__ == "__main__":
+    SERVER.listen(5)  # google it
+    print("Waiting for connection...")
+    ACCEPT_THREAD = Thread(target=accept_incoming_connections)
+    ACCEPT_THREAD.start()
+    ACCEPT_THREAD.join()
+    SERVER.close()
